@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NetTopologySuite.Geometries;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -8,7 +9,8 @@ namespace Infrastructure.Entities
     {
         public int PostId { get; set; }
         public string Content { get; set; }
-        public string Location { get; set; }
+        public string LocationDescription { get; set; }
+        public Point Location { get; set; }
         public string Image { get; set; }
         public DateTime PublicationDate { get; set; }
         public int ReactionsCounter { get; set; }

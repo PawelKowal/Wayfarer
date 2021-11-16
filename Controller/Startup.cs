@@ -34,7 +34,7 @@ namespace VVayfarerApi
                        .AllowCredentials();
             }));
 
-            services.AddDbContext<WayfarerDbContext>(opt => opt.UseSqlServer(Configuration["ConnectionStrings:DefaultConnection"]));
+            services.AddDbContext<WayfarerDbContext>(opt => opt.UseSqlServer(Configuration["ConnectionStrings:DefaultConnection"], x => x.UseNetTopologySuite()));
 
             services.AddIdentity<User, IdentityRole<Guid>>(options =>
             {

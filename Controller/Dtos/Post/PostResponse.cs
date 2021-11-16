@@ -9,7 +9,9 @@ namespace Controller.Dtos.Post
     {
         public int PostId { get; set; }
         public string Content { get; set; }
-        public string Location { get; set; }
+        public string LocationDescription { get; set; }
+        public double Longitude { get; set; }
+        public double Latitude { get; set; }
         public string Image { get; set; }
         public DateTime PublicationDate { get; set; }
         public int ReactionsCounter { get; set; }

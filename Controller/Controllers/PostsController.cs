@@ -161,5 +161,23 @@ namespace Infrastructure.Controllers
 
             return NoContent();
         }
+
+        // GET: api/Posts/{from-area}
+        [Authorize]
+        [HttpGet("{from-area}")]
+        public async Task<ActionResult<IEnumerable<PostResponse>>> GetPostsFromAreaAsync([FromBody] AreaRequest area)
+        {
+            var authorizedUserId = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (authorizedUserId == null)
+            {
+                ModelState.AddModelError(string.Empty, "Unauthorized.");
+                return ValidationProblem(statusCode: StatusCodes.Status401Unauthorized);
+            }
+
+            var posts = await _postsRepository.GetPostsFromAreaAsync(_mapper.Map<AreaDto>(area), Guid.Parse(authorizedUserId.Value));
+
+            return Ok(_mapper.Map<PostResponse>(posts));
+        }
     }
 }

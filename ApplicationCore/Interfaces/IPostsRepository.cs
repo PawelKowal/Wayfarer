@@ -12,5 +12,6 @@ namespace ApplicationCore.Interfaces
         Task<PostDto> AddPostAsync(PostDto postDto);
         Task<PostDto> UpdatePostAsync(PostDto postDto);
         Task DeletePostAsync(int postId);
+        Task<IEnumerable<PostDto>> GetPostsFromAreaAsync(AreaDto areaDto, Guid guid);
     }
 }

@@ -7,6 +7,7 @@ using ApplicationCore.Dtos;
 using ApplicationCore.Interfaces;
 using AutoMapper;
 using System;
+using NetTopologySuite.Geometries;
 
 namespace Infrastructure.Repositories
 {
@@ -80,6 +81,24 @@ namespace Infrastructure.Repositories
         {
             comment.Reacted = _context.CommentsReactions.Any(reaction => reaction.UserId == userId && reaction.CommentId == comment.CommentId);
             return comment;
+        }
+
+        public async Task<IEnumerable<PostDto>> GetPostsFromAreaAsync(AreaDto areaDto, Guid guid)
+        {
+            var area = new Polygon(new LinearRing(new Coordinate[4] {
+                new Coordinate(areaDto.Latitude1, areaDto.Longitude1),
+                new Coordinate(areaDto.Latitude2, areaDto.Longitude2),
+                new Coordinate(areaDto.Latitude3, areaDto.Longitude3),
+                new Coordinate(areaDto.Latitude4, areaDto.Longitude4)
+            }));
+
+            return await _context.Posts
+                .Include(post => post.Comments)
+                .ThenInclude(comment => comment.User)
+                .Include(post => post.User)
+                .Where(post => post.Location.Within(area))
+                .Select(post => _mapper.Map<PostDto>(post))
+                .ToListAsync();
         }
     }
 }
