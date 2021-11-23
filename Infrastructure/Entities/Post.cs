@@ -16,7 +16,7 @@ namespace Infrastructure.Entities
         public int ReactionsCounter { get; set; }
         public List<PostReaction> PostReactions { get; set; }
         public List<Comment> Comments { get; set; }
-        public Guid UserId { get; set; }
+        public int UserId { get; set; }
         [ForeignKey("UserId")]
         public User User { get; set; }
     }

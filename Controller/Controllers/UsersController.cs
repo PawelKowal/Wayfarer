@@ -26,7 +26,7 @@ namespace Infrastructure.Controllers
 
         //GET api/user/{id}
         [HttpGet("{Id}", Name = "GetUserById")]
-        public async Task<ActionResult<UserResponse>> GetUserByIdAsync(string Id)
+        public async Task<ActionResult<UserResponse>> GetUserByIdAsync(int Id)
         {
             var user = await _usersRepository.GetUserByIdAsync(Id);
             if (user is null)
@@ -40,7 +40,7 @@ namespace Infrastructure.Controllers
 
         //GET api/user/{id}
         [HttpGet("{Id}/posts")]
-        public async Task<ActionResult<UserResponse>> GetUserWithPostsByIdAsync(string Id)
+        public async Task<ActionResult<UserResponse>> GetUserWithPostsByIdAsync(int Id)
         {
             var user = await _usersRepository.GetUserWithPostsByIdAsync(Id);
             if (user is null)
@@ -66,9 +66,9 @@ namespace Infrastructure.Controllers
         [Authorize]
         public async Task<IActionResult> UpdateUserAsync([FromBody] UserRequest userRequest)
         {
-            var authorizedUserId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            var authorizedUserId = User.FindFirst(ClaimTypes.NameIdentifier);
 
-            if (authorizedUserId != userRequest.UserId)
+            if (int.Parse(authorizedUserId.Value) != userRequest.UserId)
             {
                 ModelState.AddModelError(string.Empty, "Unauthorized.");
                 return ValidationProblem(statusCode: StatusCodes.Status401Unauthorized);

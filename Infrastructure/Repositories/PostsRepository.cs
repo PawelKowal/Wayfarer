@@ -6,7 +6,6 @@ using Infrastructure.Entities;
 using ApplicationCore.Dtos;
 using ApplicationCore.Interfaces;
 using AutoMapper;
-using System;
 using NetTopologySuite.Geometries;
 
 namespace Infrastructure.Repositories
@@ -22,7 +21,7 @@ namespace Infrastructure.Repositories
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<PostDto>> GetAllPostsAsync(Guid authorizedUserId)
+        public async Task<IEnumerable<PostDto>> GetAllPostsAsync(int authorizedUserId)
         {
             return await _context.Posts
                 .Include(post => post.Comments)
@@ -33,7 +32,7 @@ namespace Infrastructure.Repositories
                 .ToListAsync();
         }
 
-        public async Task<PostDto> GetPostByIdAsync(int postId, Guid authorizedUserId)
+        public async Task<PostDto> GetPostByIdAsync(int postId, int authorizedUserId)
         {
             var post = await _context.Posts
                 .Include(post => post.Comments)
@@ -70,20 +69,20 @@ namespace Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-        private PostDto CheckIfReacted(Guid userId, PostDto post)
+        private PostDto CheckIfReacted(int userId, PostDto post)
         {
             post.Reacted = _context.PostsReactions.Any(reaction => reaction.UserId == userId && reaction.PostId == post.PostId);
             post.Comments = post.Comments.ConvertAll(comment => CheckIfReactedToComment(userId, comment));
             return post;
         }
 
-        private CommentDto CheckIfReactedToComment(Guid userId, CommentDto comment)
+        private CommentDto CheckIfReactedToComment(int userId, CommentDto comment)
         {
             comment.Reacted = _context.CommentsReactions.Any(reaction => reaction.UserId == userId && reaction.CommentId == comment.CommentId);
             return comment;
         }
 
-        public async Task<IEnumerable<PostDto>> GetPostsFromAreaAsync(AreaDto areaDto, Guid guid)
+        public async Task<IEnumerable<PostDto>> GetPostsFromAreaAsync(AreaDto areaDto, int authorizedUserId)
         {
             var area = new Polygon(new LinearRing(new Coordinate[4] {
                 new Coordinate(areaDto.Latitude1, areaDto.Longitude1),
@@ -98,6 +97,7 @@ namespace Infrastructure.Repositories
                 .Include(post => post.User)
                 .Where(post => post.Location.Within(area))
                 .Select(post => _mapper.Map<PostDto>(post))
+                .Select(post => CheckIfReacted(authorizedUserId, post))
                 .ToListAsync();
         }
     }

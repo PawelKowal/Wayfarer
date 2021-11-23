@@ -2,11 +2,10 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System;
 
 namespace Infrastructure
 {
-    public class WayfarerDbContext: IdentityDbContext<User, IdentityRole<Guid>, Guid>
+    public class WayfarerDbContext: IdentityDbContext<User, IdentityRole<int>, int>
     {
         public DbSet<Post> Posts { get; set; }
         public DbSet<Comment> Comments { get; set; }
@@ -14,6 +13,8 @@ namespace Infrastructure
         public DbSet<PostReaction> PostsReactions { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<Follow> Follows { get; set; }
+        public DbSet<Chat> Chats { get; set; }
+        public DbSet<ChatMessage> ChatMessages { get; set; }
 
         public WayfarerDbContext(DbContextOptions options) : base(options)
         {
@@ -50,6 +51,21 @@ namespace Infrastructure
                 .WithMany(u => u.Followers)
                 .HasForeignKey(f => f.FollowedId)
                 .OnDelete(DeleteBehavior.Restrict);
+            builder.Entity<Chat>()
+                .HasOne(c => c.User1)
+                .WithMany()
+                .IsRequired()
+                .OnDelete(DeleteBehavior.ClientSetNull);
+            builder.Entity<Chat>()
+                .HasOne(c => c.User2)
+                .WithMany()
+                .IsRequired()
+                .OnDelete(DeleteBehavior.ClientSetNull);
+            builder.Entity<ChatMessage>()
+                .HasOne(c => c.Author)
+                .WithMany()
+                .IsRequired()
+                .OnDelete(DeleteBehavior.ClientSetNull);
         }
     }
 }

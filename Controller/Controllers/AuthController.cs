@@ -99,7 +99,7 @@ namespace Controller.Controllers
 
             if (authorizedUserId is not null)
             {
-                var result = await _authService.LogoutUserAsync(authorizedUserId);
+                var result = await _authService.LogoutUserAsync(int.Parse(authorizedUserId));
 
                 if (result.IsSuccess)
                 {

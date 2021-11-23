@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -41,7 +40,7 @@ namespace Infrastructure.Controllers
                 return ValidationProblem(statusCode: StatusCodes.Status401Unauthorized);
             }
 
-            var posts = await _postsRepository.GetAllPostsAsync(Guid.Parse(authorizedUserId.Value));
+            var posts = await _postsRepository.GetAllPostsAsync(int.Parse(authorizedUserId.Value));
 
             return Ok(posts.Select(post => _mapper.Map<PostResponse>(post)));
         }
@@ -59,7 +58,7 @@ namespace Infrastructure.Controllers
                 return ValidationProblem(statusCode: StatusCodes.Status401Unauthorized);
             }
 
-            var post = await _postsRepository.GetPostByIdAsync(id, Guid.Parse(authorizedUserId.Value));
+            var post = await _postsRepository.GetPostByIdAsync(id, int.Parse(authorizedUserId.Value));
 
             if (post == null)
             {
@@ -76,7 +75,7 @@ namespace Infrastructure.Controllers
         public async Task<ActionResult<PostResponse>> AddPostAsync([FromBody] PostRequest post)
         {
             var authorizedUserId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
-            
+
             if (authorizedUserId == null)
             {
                 ModelState.AddModelError(string.Empty, "Unauthorized.");
@@ -84,10 +83,10 @@ namespace Infrastructure.Controllers
             }
 
             var postDto = _mapper.Map<PostDto>(post);
-            postDto.UserId = Guid.Parse(authorizedUserId);
+            postDto.UserId = int.Parse(authorizedUserId);
 
             var newPost = await _postsRepository.AddPostAsync(postDto);
-            
+
             if (newPost is null)
             {
                 ModelState.AddModelError(string.Empty, "An error occured.");
@@ -97,10 +96,10 @@ namespace Infrastructure.Controllers
             return Ok(_mapper.Map<PostResponse>(newPost));
         }
 
-        // PUT: api/Posts
+        // PUT: api/Posts/{id}
         [Authorize]
-        [HttpPost]
-        public async Task<ActionResult<PostResponse>> UpdatePostAsync([FromBody] PostRequest post)
+        [HttpPost("{id}")]
+        public async Task<ActionResult<PostResponse>> UpdatePostAsync(int id, [FromBody] PostRequest post)
         {
             var authorizedUserId = User.FindFirst(ClaimTypes.NameIdentifier);
 
@@ -110,7 +109,7 @@ namespace Infrastructure.Controllers
                 return ValidationProblem(statusCode: StatusCodes.Status401Unauthorized);
             }
 
-            var oldPost = await _postsRepository.GetPostByIdAsync(post.PostId, Guid.Parse(authorizedUserId.Value));
+            var oldPost = await _postsRepository.GetPostByIdAsync(id, int.Parse(authorizedUserId.Value));
 
             if (oldPost.UserId.ToString() != authorizedUserId.Value)
             {
@@ -144,7 +143,7 @@ namespace Infrastructure.Controllers
                 return ValidationProblem(statusCode: StatusCodes.Status401Unauthorized);
             }
 
-            var post = await _postsRepository.GetPostByIdAsync(id, Guid.Parse(authorizedUserId.Value));
+            var post = await _postsRepository.GetPostByIdAsync(id, int.Parse(authorizedUserId.Value));
             if (post is null)
             {
                 ModelState.AddModelError(string.Empty, "Post not found.");
@@ -175,7 +174,7 @@ namespace Infrastructure.Controllers
                 return ValidationProblem(statusCode: StatusCodes.Status401Unauthorized);
             }
 
-            var posts = await _postsRepository.GetPostsFromAreaAsync(_mapper.Map<AreaDto>(area), Guid.Parse(authorizedUserId.Value));
+            var posts = await _postsRepository.GetPostsFromAreaAsync(_mapper.Map<AreaDto>(area), int.Parse(authorizedUserId.Value));
 
             return Ok(_mapper.Map<PostResponse>(posts));
         }

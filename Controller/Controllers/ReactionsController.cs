@@ -1,5 +1,4 @@
-﻿using System;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using System.Threading.Tasks;
 using ApplicationCore.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -38,7 +37,7 @@ namespace Infrastructure.Controllers
                 return ValidationProblem(statusCode: StatusCodes.Status401Unauthorized);
             }
 
-            var userId = Guid.Parse(authorizedUserId.Value);
+            var userId = int.Parse(authorizedUserId.Value);
 
             var post = _postsRepository.GetPostByIdAsync(postId, userId);
             if (post is null)
@@ -71,7 +70,7 @@ namespace Infrastructure.Controllers
                 return ValidationProblem(statusCode: StatusCodes.Status401Unauthorized);
             }
 
-            var result = await _reactionsRepository.DeletePostReactionAsync(Guid.Parse(authorizedUserId.Value), reactionId);
+            var result = await _reactionsRepository.DeletePostReactionAsync(int.Parse(authorizedUserId.Value), reactionId);
 
             if (!result)
             {
@@ -102,7 +101,7 @@ namespace Infrastructure.Controllers
                 return ValidationProblem(statusCode: StatusCodes.Status404NotFound);
             }
 
-            var result = await _reactionsRepository.AddCommentReactionAsync(Guid.Parse(authorizedUserId.Value), commentId);
+            var result = await _reactionsRepository.AddCommentReactionAsync(int.Parse(authorizedUserId.Value), commentId);
 
             if (!result)
             {
@@ -126,7 +125,7 @@ namespace Infrastructure.Controllers
                 return ValidationProblem(statusCode: StatusCodes.Status401Unauthorized);
             }
 
-            var reaction = await _reactionsRepository.DeleteCommentReactionAsync(Guid.Parse(authorizedUserId.Value), reactionId);
+            var reaction = await _reactionsRepository.DeleteCommentReactionAsync(int.Parse(authorizedUserId.Value), reactionId);
 
             if (!reaction)
             {

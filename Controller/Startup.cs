@@ -12,6 +12,11 @@ using Newtonsoft.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Infrastructure;
 using Infrastructure.Entities;
+using System.Reflection;
+using Infrastructure.Profiles;
+using ApplicationCore.Services;
+using ApplicationCore.Interfaces;
+using Infrastructure.Repositories;
 
 namespace VVayfarerApi
 {
@@ -35,8 +40,8 @@ namespace VVayfarerApi
             }));
 
             services.AddDbContext<WayfarerDbContext>(opt => opt.UseSqlServer(Configuration["ConnectionStrings:DefaultConnection"], x => x.UseNetTopologySuite()));
-
-            services.AddIdentity<User, IdentityRole<Guid>>(options =>
+            services.AddAutoMapper(Assembly.GetExecutingAssembly(), typeof(ChatProfile).Assembly, typeof(ApplicationCore.Profiles.UserProfile).Assembly);
+            services.AddIdentity<User, IdentityRole<int>>(options =>
             {
                 options.User.RequireUniqueEmail = true;
             })
@@ -72,6 +77,19 @@ namespace VVayfarerApi
             });
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            services.AddSignalR();
+
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IChatsRepository, ChatsRepository>();
+            services.AddScoped<ICommentsRepository, CommentsRepository>();
+            services.AddScoped<ICommentsService, CommentsService>();
+            services.AddScoped<IFollowsRepository, FollowsRepository>();
+            services.AddScoped<IPostsRepository, PostsRepository>();
+            services.AddScoped<IPostsService, PostsService>();
+            services.AddScoped<IReactionsRepository, ReactionsRepository>();
+            services.AddScoped<IReactionsService, ReactionsService>();
+            services.AddScoped<IUsersRepository, UsersRepository>();
+            services.AddScoped<IUsersService, UsersService>();
 
             services.AddControllers();
         }

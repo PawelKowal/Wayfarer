@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace VVayfarerApi.Repositories
+namespace Infrastructure.Repositories
 {
     public class UsersRepository : IUsersRepository
     {
@@ -33,9 +33,9 @@ namespace VVayfarerApi.Repositories
             return _mapper.Map<SimpleResultDto>(result);
         }
 
-        public async Task<SimpleResultDto> DeleteRefreshTokenAsync(string userId)
+        public async Task<SimpleResultDto> DeleteRefreshTokenAsync(int userId)
         {
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = await _userManager.FindByIdAsync(userId.ToString());
             user.RefreshToken = null;
 
             var updateResult = await _userManager.UpdateAsync(user);
@@ -55,21 +55,21 @@ namespace VVayfarerApi.Repositories
                 .FirstOrDefaultAsync(user => user.RefreshToken.Token == token));
         }
 
-        public async Task<UserDto> GetUserByIdAsync(string userId)
+        public async Task<UserDto> GetUserByIdAsync(int userId)
         {
             var user = await _context.Users
-                .FirstOrDefaultAsync(user => user.Id == Guid.Parse(userId));
+                .FirstOrDefaultAsync(user => user.Id == userId);
 
             return _mapper.Map<UserDto>(user);
         }
 
-        public async Task<UserDto> GetUserWithPostsByIdAsync(string userId)
+        public async Task<UserDto> GetUserWithPostsByIdAsync(int userId)
         {
             var user = await _context.Users
                 .Include(user => user.Posts)
                 .Include(user => user.Followers)
                 .Include(user => user.Following)
-                .FirstOrDefaultAsync(user => user.Id == Guid.Parse(userId));
+                .FirstOrDefaultAsync(user => user.Id == userId);
 
             return _mapper.Map<UserDto>(user);
         }

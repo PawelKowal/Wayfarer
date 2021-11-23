@@ -16,7 +16,7 @@ namespace Controller.Dtos.Post
         public DateTime PublicationDate { get; set; }
         public int ReactionsCounter { get; set; }
         public List<CommentResponse> Comments { get; set; }
-        public Guid UserId { get; set; }
+        public int UserId { get; set; }
         public UserResponse User { get; set; }
         public bool? Reacted { get; set; }
     }

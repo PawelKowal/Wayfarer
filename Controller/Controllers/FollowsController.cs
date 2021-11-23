@@ -1,10 +1,7 @@
 ﻿using ApplicationCore.Interfaces;
-using Controller.Dtos.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -23,7 +20,7 @@ namespace Controller.Controllers
         //PUT api/follows/{id}
         [Authorize]
         [HttpPut("{id}")]
-        public async Task<IActionResult> FollowUserAsync(string id)
+        public async Task<IActionResult> FollowUserAsync(int id)
         {
             var authorizedUserId = User.FindFirst(ClaimTypes.NameIdentifier);
 
@@ -33,8 +30,8 @@ namespace Controller.Controllers
                 return ValidationProblem(statusCode: StatusCodes.Status401Unauthorized);
             }
 
-            var followerId = Guid.Parse(authorizedUserId.Value);
-            var followedId = Guid.Parse(id);
+            var followerId = int.Parse(authorizedUserId.Value);
+            var followedId = id;
 
             var result = await _followsRepository.FollowUserAsync(followerId, followedId);
             if (!result)
@@ -49,7 +46,7 @@ namespace Controller.Controllers
         //DELETE api/follows/{id}
         [Authorize]
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteFollowAsync(string id)
+        public async Task<IActionResult> DeleteFollowAsync(int id)
         {
             var authorizedUserId = User.FindFirst(ClaimTypes.NameIdentifier);
 
@@ -59,8 +56,8 @@ namespace Controller.Controllers
                 return ValidationProblem(statusCode: StatusCodes.Status401Unauthorized);
             }
 
-            var followerId = Guid.Parse(authorizedUserId.Value);
-            var followedId = Guid.Parse(id);
+            var followerId = int.Parse(authorizedUserId.Value);
+            var followedId = id;
 
             var doesFollowExist = await _followsRepository.CheckIfFollowExistAsync(followerId, followedId);
             if (!doesFollowExist)

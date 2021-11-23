@@ -2,7 +2,6 @@
 {
     public class PostRequest
     {
-        public int PostId { get; set; }
         public string Content { get; set; }
         public string LocationDescription { get; set; }
         public double Longitude { get; set; }

@@ -39,7 +39,7 @@ namespace Infrastructure.Controllers
                 return ValidationProblem(statusCode: StatusCodes.Status401Unauthorized);
             }
 
-            var userId = Guid.Parse(authorizedUserId.Value);
+            var userId = int.Parse(authorizedUserId.Value);
 
             var post = _postsRepository.GetPostByIdAsync(comment.PostId, userId);
             if (post is null)
@@ -50,6 +50,7 @@ namespace Infrastructure.Controllers
 
             var commentDto = _mapper.Map<CommentDto>(comment);
             commentDto.UserId = userId;
+            commentDto.PublicationDate = DateTimeOffset.Now;
 
             var newComment = await _commentsRepository.AddCommentAsync(commentDto);
 

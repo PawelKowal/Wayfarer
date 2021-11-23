@@ -9,6 +9,6 @@ namespace ApplicationCore.Interfaces
         public Task<AuthServiceResultDto> RegisterUserAsync(RegistrationDto registrationModel);
         public Task<AuthServiceResultDto> LoginUserAsync(LoginDto loginModel);
         public Task<AuthServiceResultDto> RefreshTokenAsync(string refreshToken);
-        public Task<SimpleResultDto> LogoutUserAsync(string userId);
+        public Task<SimpleResultDto> LogoutUserAsync(int userId);
     }
 }

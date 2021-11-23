@@ -15,7 +15,7 @@ namespace ApplicationCore.Dtos
         public int ReactionsCounter { get; set; }
         public List<PostReactionDto> PostReactions { get; set; }
         public List<CommentDto> Comments { get; set; }
-        public Guid UserId { get; set; }
+        public int UserId { get; set; }
         public UserDto User { get; set; }
         public bool? Reacted { get; set; }
     }

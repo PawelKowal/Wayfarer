@@ -15,7 +15,7 @@ namespace Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<bool> AddPostReactionAsync(Guid userId, int postId)
+        public async Task<bool> AddPostReactionAsync(int userId, int postId)
         {
             var post = await _context.Posts.FirstOrDefaultAsync(post => post.PostId == postId);
 
@@ -45,7 +45,7 @@ namespace Infrastructure.Repositories
             return true;
         }
 
-        public async Task<bool> AddCommentReactionAsync(Guid userId, int commentId)
+        public async Task<bool> AddCommentReactionAsync(int userId, int commentId)
         {
             var comment = await _context.Comments.FirstOrDefaultAsync(comment => comment.CommentId == commentId);
 
@@ -75,7 +75,7 @@ namespace Infrastructure.Repositories
             return true;
         }
 
-        public async Task<bool> DeletePostReactionAsync(Guid userId, int postId)
+        public async Task<bool> DeletePostReactionAsync(int userId, int postId)
         {
             var reaction = await _context.PostsReactions.FirstOrDefaultAsync(reaction => reaction.PostId == postId && reaction.UserId == userId);
             if (reaction is null)
@@ -101,7 +101,7 @@ namespace Infrastructure.Repositories
             return true;
         }
 
-        public async Task<bool> DeleteCommentReactionAsync(Guid userId, int commentId)
+        public async Task<bool> DeleteCommentReactionAsync(int userId, int commentId)
         {
             var reaction = await _context.CommentsReactions.FirstOrDefaultAsync(reaction => reaction.CommentId == commentId && reaction.UserId == userId);
             if (reaction is null)
@@ -127,12 +127,12 @@ namespace Infrastructure.Repositories
             return true;
         }
 
-        public Task<bool> DoesPostReactionExistAsync(Guid userId, int postId)
+        public Task<bool> DoesPostReactionExistAsync(int userId, int postId)
         {
             return _context.PostsReactions.AnyAsync(e => e.PostId == postId && e.UserId == userId);
         }
 
-        public Task<bool> DoesCommentReactionExistAsync(Guid userId, int commentId)
+        public Task<bool> DoesCommentReactionExistAsync(int userId, int commentId)
         {
             return _context.CommentsReactions.AnyAsync(e => e.CommentId == commentId && e.UserId == userId);
         }

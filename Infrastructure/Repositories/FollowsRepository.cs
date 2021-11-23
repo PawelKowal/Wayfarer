@@ -15,12 +15,12 @@ namespace Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<bool> CheckIfFollowExistAsync(Guid followerId, Guid followedId)
+        public async Task<bool> CheckIfFollowExistAsync(int followerId, int followedId)
         {
             return await _context.Follows.AnyAsync(f => f.FollowerId == followerId && f.FollowedId == followedId);
         }
 
-        public async Task<bool> FollowUserAsync(Guid followerId, Guid followedId)
+        public async Task<bool> FollowUserAsync(int followerId, int followedId)
         {
             try
             {
@@ -35,7 +35,7 @@ namespace Infrastructure.Repositories
             return true;
         }
 
-        public async Task<bool> UnfollowUserAsync(Guid followerId, Guid followedId)
+        public async Task<bool> UnfollowUserAsync(int followerId, int followedId)
         {
             var follow = await _context.Follows.FirstOrDefaultAsync(f => f.FollowedId == followedId && f.FollowerId == followerId);
             if (follow is null)
