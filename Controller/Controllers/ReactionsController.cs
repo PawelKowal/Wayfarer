@@ -26,7 +26,7 @@ namespace Infrastructure.Controllers
 
         // POST: api/reactions/post/{id}
         [Authorize]
-        [HttpPost("post/{id}")]
+        [HttpPost("post/{postId}")]
         public async Task<ActionResult> AddPostReactionAsync(int postId)
         {
             var authorizedUserId = User.FindFirst(ClaimTypes.NameIdentifier);
@@ -39,7 +39,7 @@ namespace Infrastructure.Controllers
 
             var userId = int.Parse(authorizedUserId.Value);
 
-            var post = _postsRepository.GetPostByIdAsync(postId, userId);
+            var post = await _postsRepository.GetPostByIdAsync(postId, userId);
             if (post is null)
             {
                 ModelState.AddModelError(string.Empty, "Post not found.");
@@ -83,7 +83,7 @@ namespace Infrastructure.Controllers
 
         // POST: api/reactions/comment/{id}
         [Authorize]
-        [HttpPost("comment/{id}")]
+        [HttpPost("comment/{commentId}")]
         public async Task<ActionResult> AddCommentReactionAsync(int commentId)
         {
             var authorizedUserId = User.FindFirst(ClaimTypes.NameIdentifier);
@@ -94,7 +94,7 @@ namespace Infrastructure.Controllers
                 return ValidationProblem(statusCode: StatusCodes.Status401Unauthorized);
             }
 
-            var comment = _commentsRepository.GetCommentByIdAsync(commentId);
+            var comment = await _commentsRepository.GetCommentByIdAsync(commentId);
             if (comment is null)
             {
                 ModelState.AddModelError(string.Empty, "Comment not found.");

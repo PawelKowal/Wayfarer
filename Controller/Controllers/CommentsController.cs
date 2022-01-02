@@ -41,7 +41,7 @@ namespace Infrastructure.Controllers
 
             var userId = int.Parse(authorizedUserId.Value);
 
-            var post = _postsRepository.GetPostByIdAsync(comment.PostId, userId);
+            var post = await _postsRepository.GetPostByIdAsync(comment.PostId, userId);
             if (post is null)
             {
                 ModelState.AddModelError(string.Empty, "Post not found.");

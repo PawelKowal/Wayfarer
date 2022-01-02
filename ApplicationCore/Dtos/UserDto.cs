@@ -8,7 +8,7 @@ namespace ApplicationCore.Dtos
         public int UserId { get; set; }
         public string Email { get; set; }
         public string Username { get; set; }
-        public string Image { get; set; }
+        public string? Image { get; set; }
         public string ProfileDescription { get; set; }
         public RefreshTokenDto RefreshToken { get; set; }
         public List<PostDto> Posts { get; set; }

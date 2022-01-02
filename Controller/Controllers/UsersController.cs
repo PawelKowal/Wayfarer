@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -7,6 +9,7 @@ using ApplicationCore.Interfaces;
 using AutoMapper;
 using Controller.Dtos.User;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,10 +21,35 @@ namespace Infrastructure.Controllers
     {
         private readonly IUsersRepository _usersRepository;
         private readonly IMapper _mapper;
-        public UsersController(IUsersRepository usersRepository, IMapper mapper)
+        private readonly IWebHostEnvironment _hostEnvironment;
+
+        public UsersController(IUsersRepository usersRepository, IMapper mapper, IWebHostEnvironment hostEnvironment)
         {
             _usersRepository = usersRepository;
             _mapper = mapper;
+            _hostEnvironment = hostEnvironment;
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<ActionResult<UserResponse>> GetLoggedUserAsync()
+        {
+            var authorizedUserId = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (authorizedUserId == null)
+            {
+                ModelState.AddModelError(string.Empty, "Unauthorized.");
+                return ValidationProblem(statusCode: StatusCodes.Status401Unauthorized);
+            }
+
+            var userDto = await _usersRepository.GetUserByIdAsync(int.Parse(authorizedUserId.Value));
+            if (userDto is not null)
+            {
+                return Ok(_mapper.Map<UserResponse>(userDto));
+            }
+
+            ModelState.AddModelError(string.Empty, "User not found.");
+            return ValidationProblem(statusCode: StatusCodes.Status404NotFound);
         }
 
         //GET api/user/{id}
@@ -53,7 +81,7 @@ namespace Infrastructure.Controllers
         }
 
         //GET /api/user
-        [HttpGet]
+        [HttpGet("all")]
         public async Task<ActionResult<IEnumerable<UserResponse>>> GetAllUsersAsync()
         {
             var users = await _usersRepository.GetAllUsersAsync();
@@ -64,7 +92,7 @@ namespace Infrastructure.Controllers
         //PUT api/user
         [HttpPut]
         [Authorize]
-        public async Task<IActionResult> UpdateUserAsync([FromBody] UserRequest userRequest)
+        public async Task<IActionResult> UpdateUserAsync([FromForm] UserRequest userRequest)
         {
             var authorizedUserId = User.FindFirst(ClaimTypes.NameIdentifier);
 
@@ -74,7 +102,14 @@ namespace Infrastructure.Controllers
                 return ValidationProblem(statusCode: StatusCodes.Status401Unauthorized);
             }
 
-            var result = await _usersRepository.UpdateUserAsync(_mapper.Map<UserDto>(userRequest));
+            var userDto = _mapper.Map<UserDto>(userRequest);
+
+            if(userRequest.Image is not null)
+            {
+                userDto.Image = await SaveImageAsync(userRequest.Image);
+            }
+
+            var result = await _usersRepository.UpdateUserAsync(userDto);
             if (!result.IsSuccess)
             {
                 var key = "NotFound";
@@ -92,6 +127,18 @@ namespace Infrastructure.Controllers
             }
 
             return NoContent();
+        }
+
+        private async Task<string> SaveImageAsync(IFormFile imageFile)
+        {
+            string imageName = new string(Path.GetFileNameWithoutExtension(imageFile.FileName).Take(10).ToArray()).Replace(' ', '-');
+            imageName = imageName + DateTime.Now.ToString("yymmssfff") + Path.GetExtension(imageFile.FileName);
+            var imagePath = Path.Combine(_hostEnvironment.ContentRootPath, "Images", imageName);
+            using (var fileStream = new FileStream(imagePath, FileMode.Create))
+            {
+                await imageFile.CopyToAsync(fileStream);
+            }
+            return imageName;
         }
     }
 }

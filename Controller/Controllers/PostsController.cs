@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -7,6 +9,7 @@ using ApplicationCore.Interfaces;
 using AutoMapper;
 using Controller.Dtos.Post;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,12 +22,14 @@ namespace Infrastructure.Controllers
         private readonly IPostsRepository _postsRepository;
         private readonly IPostsService _postsService;
         private readonly IMapper _mapper;
+        private readonly IWebHostEnvironment _hostEnvironment;
 
-        public PostsController(IPostsRepository postsRepository, IPostsService postsService, IMapper mapper)
+        public PostsController(IPostsRepository postsRepository, IPostsService postsService, IMapper mapper, IWebHostEnvironment hostEnvironment)
         {
             _postsRepository = postsRepository;
             _postsService = postsService;
             _mapper = mapper;
+            _hostEnvironment = hostEnvironment;
         }
 
         // GET: api/Posts
@@ -41,7 +46,6 @@ namespace Infrastructure.Controllers
             }
 
             var posts = await _postsRepository.GetAllPostsAsync(int.Parse(authorizedUserId.Value));
-
             return Ok(posts.Select(post => _mapper.Map<PostResponse>(post)));
         }
 
@@ -72,7 +76,7 @@ namespace Infrastructure.Controllers
         // POST: api/Posts
         [Authorize]
         [HttpPost]
-        public async Task<ActionResult<PostResponse>> AddPostAsync([FromBody] PostRequest post)
+        public async Task<ActionResult<PostResponse>> AddPostAsync([FromForm] PostRequest post)
         {
             var authorizedUserId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
@@ -84,6 +88,7 @@ namespace Infrastructure.Controllers
 
             var postDto = _mapper.Map<PostDto>(post);
             postDto.UserId = int.Parse(authorizedUserId);
+            postDto.Image = await SaveImageAsync(post.Image);
 
             var newPost = await _postsRepository.AddPostAsync(postDto);
 
@@ -161,9 +166,9 @@ namespace Infrastructure.Controllers
             return NoContent();
         }
 
-        // GET: api/Posts/{from-area}
+        // GET: api/Posts/from-area
         [Authorize]
-        [HttpGet("{from-area}")]
+        [HttpGet("from-area")]
         public async Task<ActionResult<IEnumerable<PostResponse>>> GetPostsFromAreaAsync([FromBody] AreaRequest area)
         {
             var authorizedUserId = User.FindFirst(ClaimTypes.NameIdentifier);
@@ -177,6 +182,18 @@ namespace Infrastructure.Controllers
             var posts = await _postsRepository.GetPostsFromAreaAsync(_mapper.Map<AreaDto>(area), int.Parse(authorizedUserId.Value));
 
             return Ok(_mapper.Map<PostResponse>(posts));
+        }
+
+        private async Task<string> SaveImageAsync(IFormFile imageFile)
+        {
+            string imageName = new string(Path.GetFileNameWithoutExtension(imageFile.FileName).Take(10).ToArray()).Replace(' ', '-');
+            imageName = imageName + DateTime.Now.ToString("yymmssfff") + Path.GetExtension(imageFile.FileName);
+            var imagePath = Path.Combine(_hostEnvironment.ContentRootPath, "Images", imageName);
+            using (var fileStream = new FileStream(imagePath, FileMode.Create))
+            {
+                await imageFile.CopyToAsync(fileStream);
+            }
+            return imageName;
         }
     }
 }

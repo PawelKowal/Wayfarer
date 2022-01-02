@@ -2,7 +2,6 @@
 using ApplicationCore.Dtos.Auth;
 using ApplicationCore.Interfaces;
 using AutoMapper;
-using Infrastructure;
 using Infrastructure.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -58,6 +57,10 @@ namespace Infrastructure.Repositories
         public async Task<UserDto> GetUserByIdAsync(int userId)
         {
             var user = await _context.Users
+                .Include(user => user.Posts)
+                .ThenInclude(post => post.User)
+                .Include(user => user.Followers)
+                .Include(user => user.Following)
                 .FirstOrDefaultAsync(user => user.Id == userId);
 
             return _mapper.Map<UserDto>(user);
@@ -100,6 +103,7 @@ namespace Infrastructure.Repositories
             user.RefreshToken = new RefreshToken() { Token = token, Expires = DateTime.UtcNow.AddHours(refreshTokenExpirationInHours) };
 
             var updateResult = await _userManager.UpdateAsync(user);
+
             if (!updateResult.Succeeded)
             {
                 return new GenerateRefreshTokenResultDto() { IsSuccess = false };
@@ -121,7 +125,10 @@ namespace Infrastructure.Repositories
             }
 
             user.UserName = userDto.Username;
-            user.Image = userDto.Image;
+            if (userDto.Image is not null)
+            {
+                user.Image = userDto.Image;
+            }
             user.ProfileDescription = userDto.ProfileDescription;
 
             var updateResult = await _userManager.UpdateAsync(user);

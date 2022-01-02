@@ -18,23 +18,30 @@ namespace Infrastructure.Repositories
         public async Task<bool> AddPostReactionAsync(int userId, int postId)
         {
             var post = await _context.Posts.FirstOrDefaultAsync(post => post.PostId == postId);
-
             if (post is null)
             {
                 return false;
             }
 
-            post.ReactionsCounter++;
-
-            var newReaction = new PostReaction
+            var reaction = await _context.PostsReactions.FirstOrDefaultAsync(reaction => reaction.PostId == postId && reaction.UserId == userId);
+            if (reaction is not null)
             {
-                UserId = userId,
-                PostId = postId
-            };
+                post.ReactionsCounter--;
+                _context.PostsReactions.Remove(reaction);
+            }
+            else
+            {
+                var newReaction = new PostReaction
+                {
+                    UserId = userId,
+                    PostId = postId
+                };
+                post.ReactionsCounter++;
+                await _context.PostsReactions.AddAsync(newReaction);
+            }
 
             try
             {
-                await _context.PostsReactions.AddAsync(newReaction);
                 await _context.SaveChangesAsync();
             }
             catch
@@ -48,23 +55,30 @@ namespace Infrastructure.Repositories
         public async Task<bool> AddCommentReactionAsync(int userId, int commentId)
         {
             var comment = await _context.Comments.FirstOrDefaultAsync(comment => comment.CommentId == commentId);
-
             if (comment is null)
             {
                 return false;
             }
 
-            comment.ReactionsCounter++;
-
-            var newReaction = new CommentReaction
+            var reaction = await _context.CommentsReactions.FirstOrDefaultAsync(reaction => reaction.CommentId == commentId && reaction.UserId == userId);
+            if (reaction is not null)
             {
-                UserId = userId,
-                CommentId = commentId
-            };
+                comment.ReactionsCounter--;
+                _context.CommentsReactions.Remove(reaction);
+            }
+            else
+            {
+                var newReaction = new CommentReaction
+                {
+                    UserId = userId,
+                    CommentId = commentId
+                };
+                comment.ReactionsCounter++;
+                await _context.CommentsReactions.AddAsync(newReaction);
+            }
 
             try
             {
-                await _context.CommentsReactions.AddAsync(newReaction);
                 await _context.SaveChangesAsync();
             }
             catch

@@ -17,6 +17,8 @@ using Infrastructure.Profiles;
 using ApplicationCore.Services;
 using ApplicationCore.Interfaces;
 using Infrastructure.Repositories;
+using Microsoft.Extensions.FileProviders;
+using System.IO;
 
 namespace VVayfarerApi
 {
@@ -31,13 +33,7 @@ namespace VVayfarerApi
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCors(o => o.AddPolicy("AllowOrigin", builder =>
-            {
-                builder.SetIsOriginAllowed(origin => true)
-                       .AllowAnyMethod()
-                       .AllowAnyHeader()
-                       .AllowCredentials();
-            }));
+            services.AddCors();
 
             services.AddDbContext<WayfarerDbContext>(opt => opt.UseSqlServer(Configuration["ConnectionStrings:DefaultConnection"], x => x.UseNetTopologySuite()));
             services.AddAutoMapper(Assembly.GetExecutingAssembly(), typeof(ChatProfile).Assembly, typeof(ApplicationCore.Profiles.UserProfile).Assembly);
@@ -100,7 +96,19 @@ namespace VVayfarerApi
             {
                 app.UseDeveloperExceptionPage();
             }
-            app.UseCors("AllowOrigin");
+            app.UseCors(
+                    options => options
+                        .WithOrigins("http://localhost:3000")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials()
+                );
+
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(Path.Combine(env.ContentRootPath, "Images")),
+                RequestPath = "/Images"
+            });
 
             app.UseHttpsRedirection();
 
@@ -116,7 +124,7 @@ namespace VVayfarerApi
 
             using var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope();
             var context = serviceScope.ServiceProvider.GetRequiredService<WayfarerDbContext>();
-            context.Database.EnsureDeleted();
+            //context.Database.EnsureDeleted();
             context.Database.EnsureCreated();
         }
     }

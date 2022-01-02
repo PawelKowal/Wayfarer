@@ -7,6 +7,7 @@ using ApplicationCore.Dtos;
 using ApplicationCore.Interfaces;
 using AutoMapper;
 using NetTopologySuite.Geometries;
+using System;
 
 namespace Infrastructure.Repositories
 {
@@ -23,13 +24,12 @@ namespace Infrastructure.Repositories
 
         public async Task<IEnumerable<PostDto>> GetAllPostsAsync(int authorizedUserId)
         {
-            return await _context.Posts
-                .Include(post => post.Comments)
-                .ThenInclude(comment => comment.User)
+            var posts = await _context.Posts
                 .Include(post => post.User)
                 .Select(post => _mapper.Map<PostDto>(post))
-                .Select(post => CheckIfReacted(authorizedUserId, post))
                 .ToListAsync();
+
+            return posts.Select(post => CheckIfReacted(authorizedUserId, post));
         }
 
         public async Task<PostDto> GetPostByIdAsync(int postId, int authorizedUserId)
@@ -46,6 +46,7 @@ namespace Infrastructure.Repositories
         public async Task<PostDto> AddPostAsync(PostDto postDto)
         {
             var post = _mapper.Map<Post>(postDto);
+            post.PublicationDate = DateTimeOffset.Now;
 
             var newPost = await _context.Posts.AddAsync(post);
             await _context.SaveChangesAsync();

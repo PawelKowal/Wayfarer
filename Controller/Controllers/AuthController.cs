@@ -53,7 +53,7 @@ namespace Controller.Controllers
         [HttpPost("Login")]
         public async Task<ActionResult<AuthResponse>> LoginUserAsync([FromBody]LoginUserRequest loginUserRequest)
         {
-            var result = await _authService.LoginUserAsync(_mapper.Map<LoginDto>(loginUserRequest)); ;
+            var result = await _authService.LoginUserAsync(_mapper.Map<LoginDto>(loginUserRequest));
 
             if (result.IsSuccess)
             {

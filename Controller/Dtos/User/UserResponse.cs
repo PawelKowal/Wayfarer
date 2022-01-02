@@ -1,5 +1,4 @@
-﻿using Controller.Dtos.Follow;
-using Controller.Dtos.Post;
+﻿using Controller.Dtos.Post;
 using System.Collections.Generic;
 
 namespace Controller.Dtos.User
@@ -11,7 +10,7 @@ namespace Controller.Dtos.User
         public string Image { get; set; }
         public string ProfileDescription { get; set; }
         public List<PostResponse> Posts { get; set; }
-        public List<FollowResponse> Following { get; set; }
-        public List<FollowResponse> Followers { get; set; }
+        public List<int> Following { get; set; }
+        public List<int> Followers { get; set; }
     }
 }

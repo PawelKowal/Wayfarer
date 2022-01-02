@@ -13,7 +13,7 @@ namespace Infrastructure.Profiles
                 .ForMember(postDto => postDto.Longitude, opt => opt.MapFrom(post => post.Location.X))
                 .ForMember(postDto => postDto.Latitude, opt => opt.MapFrom(post => post.Location.Y));
             CreateMap<PostDto, Post>()
-                .ForMember(post => post.Location, opt => opt.MapFrom(post => new Point(post.Longitude, post.Latitude)));
+                .ForMember(post => post.Location, opt => opt.MapFrom(post => new Point(post.Longitude, post.Latitude) { SRID = 4326 }));
         }
     }
 }

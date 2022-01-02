@@ -99,12 +99,8 @@ namespace ApplicationCore.Services
 
         public async Task<AuthServiceResultDto> RegisterUserAsync(RegistrationDto registrationModel)
         {
-            //TODO: store it with other images?
-            byte[] imageArray = System.IO.File.ReadAllBytes(@"./Utils/defaultAvatar.jpg");
-            string base64ImageRepresentation = Convert.ToBase64String(imageArray);
-
             var user = _mapper.Map<UserDto>(registrationModel);
-            user.Image = base64ImageRepresentation;
+            user.Image = "defaultAvatar.jpg";
 
             var createResult = await _usersRepository.CreateUserAsync(user, registrationModel.Password);
             var newUser = await _usersRepository.GetUserByEmailAsync(user.Email);
