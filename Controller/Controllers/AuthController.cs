@@ -24,11 +24,6 @@ namespace Controller.Controllers
             _mapper = mapper;
         }
 
-        //TODO: remove user
-        //TODO: change email
-        //TODO: update user
-        //TODO: change password
-
         // /api/auth/register
         [HttpPost("Register")]
         public async Task<ActionResult<AuthResponse>> RegisterUserAsync([FromBody]RegisterUserRequest registerUserRequest)
@@ -73,6 +68,12 @@ namespace Controller.Controllers
         public async Task<ActionResult<AuthResponse>> RefreshTokenAsync()
         {
             var refreshToken = Request.Cookies["refreshToken"];
+
+            if (refreshToken is null)
+            {
+                ModelState.AddModelError(string.Empty, "Missing refresh token.");
+                return ValidationProblem(statusCode: StatusCodes.Status400BadRequest);
+            }
 
             var result = await _authService.RefreshTokenAsync(refreshToken);
 
