@@ -32,7 +32,7 @@ namespace Infrastructure.Controllers
 
         [HttpGet]
         [Authorize]
-        public async Task<ActionResult<UserResponse>> GetLoggedUserAsync()
+        public async Task<ActionResult<FullUserResponse>> GetLoggedUserAsync()
         {
             var authorizedUserId = User.FindFirst(ClaimTypes.NameIdentifier);
 
@@ -45,7 +45,7 @@ namespace Infrastructure.Controllers
             var userDto = await _usersRepository.GetUserByIdAsync(int.Parse(authorizedUserId.Value));
             if (userDto is not null)
             {
-                return Ok(_mapper.Map<UserResponse>(userDto));
+                return Ok(_mapper.Map<FullUserResponse>(userDto));
             }
 
             ModelState.AddModelError(string.Empty, "User not found.");
@@ -54,7 +54,7 @@ namespace Infrastructure.Controllers
 
         //GET api/user/{id}
         [HttpGet("{Id}", Name = "GetUserById")]
-        public async Task<ActionResult<UserResponse>> GetUserByIdAsync(int Id)
+        public async Task<ActionResult<FullUserResponse>> GetUserByIdAsync(int Id)
         {
             var user = await _usersRepository.GetUserByIdAsync(Id);
             if (user is null)
@@ -63,12 +63,12 @@ namespace Infrastructure.Controllers
                 return ValidationProblem(statusCode: StatusCodes.Status404NotFound);
             }
 
-            return Ok(_mapper.Map<UserResponse>(user));
+            return Ok(_mapper.Map<FullUserResponse>(user));
         }
 
         //GET api/user/{id}
         [HttpGet("{Id}/posts")]
-        public async Task<ActionResult<UserResponse>> GetUserWithPostsByIdAsync(int Id)
+        public async Task<ActionResult<FullUserResponse>> GetUserWithPostsByIdAsync(int Id)
         {
             var user = await _usersRepository.GetUserWithPostsByIdAsync(Id);
             if (user is null)
@@ -77,7 +77,7 @@ namespace Infrastructure.Controllers
                 return ValidationProblem(statusCode: StatusCodes.Status404NotFound);
             }
 
-            return Ok(_mapper.Map<UserResponse>(user));
+            return Ok(_mapper.Map<FullUserResponse>(user));
         }
 
         //GET /api/user
