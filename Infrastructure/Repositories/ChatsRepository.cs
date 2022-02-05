@@ -28,10 +28,12 @@ namespace Infrastructure.Repositories
             if (chat is null)
             {
                 chat = (await _context.Chats.AddAsync(_mapper.Map<Chat>(chatMessageDto))).Entity;
+                await _context.SaveChangesAsync();
             }
 
             var chatMessage = _mapper.Map<ChatMessage>(chatMessageDto);
             chatMessage.ChatId = chat.ChatId;
+            chat.LastMessageTime = chatMessage.SendAt;
 
             await _context.ChatMessages.AddAsync(chatMessage);
             await _context.SaveChangesAsync();

@@ -26,8 +26,8 @@ namespace Controller.Controllers
 
         // GET: api/Posts
         [Authorize]
-        [HttpGet("{id}")]
-        public ActionResult<IEnumerable<ChatMessageDto>> GetAllPosts(int userId)
+        [HttpGet("{userId}")]
+        public ActionResult<IEnumerable<ChatMessageDto>> GetAllMessages(int userId)
         {
             var authorizedUserId = User.FindFirst(ClaimTypes.NameIdentifier);
 
@@ -38,6 +38,12 @@ namespace Controller.Controllers
             }
 
             var messages = _chatsRepository.GetChatMessages(int.Parse(authorizedUserId.Value), userId);
+
+            if (messages is null)
+            {
+                ModelState.AddModelError(string.Empty, "Chat not found.");
+                return ValidationProblem(statusCode: StatusCodes.Status404NotFound);
+            }
 
             return Ok(messages.Select(messages => _mapper.Map<ChatMessageResponse>(messages)));
         }

@@ -54,8 +54,17 @@ namespace Infrastructure.Controllers
 
         //GET api/user/{id}
         [HttpGet("{Id}", Name = "GetUserById")]
+        [Authorize]
         public async Task<ActionResult<FullUserResponse>> GetUserByIdAsync(int Id)
         {
+            var authorizedUserId = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (authorizedUserId == null)
+            {
+                ModelState.AddModelError(string.Empty, "Unauthorized.");
+                return ValidationProblem(statusCode: StatusCodes.Status401Unauthorized);
+            }
+
             var user = await _usersRepository.GetUserByIdAsync(Id);
             if (user is null)
             {
@@ -68,8 +77,17 @@ namespace Infrastructure.Controllers
 
         //GET api/user/{id}
         [HttpGet("{Id}/posts")]
+        [Authorize]
         public async Task<ActionResult<FullUserResponse>> GetUserWithPostsByIdAsync(int Id)
         {
+            var authorizedUserId = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (authorizedUserId == null)
+            {
+                ModelState.AddModelError(string.Empty, "Unauthorized.");
+                return ValidationProblem(statusCode: StatusCodes.Status401Unauthorized);
+            }
+
             var user = await _usersRepository.GetUserWithPostsByIdAsync(Id);
             if (user is null)
             {
@@ -82,9 +100,18 @@ namespace Infrastructure.Controllers
 
         //GET /api/user
         [HttpGet("all")]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<UserResponse>>> GetAllUsersAsync()
         {
-            var users = await _usersRepository.GetAllUsersAsync();
+            var authorizedUserId = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (authorizedUserId == null)
+            {
+                ModelState.AddModelError(string.Empty, "Unauthorized.");
+                return ValidationProblem(statusCode: StatusCodes.Status401Unauthorized);
+            }
+
+            var users = await _usersRepository.GetAllUsersSortedByLastMessageTimeAsync(int.Parse(authorizedUserId.Value));
 
             return Ok(users.Select(user => _mapper.Map<UserResponse>(user)));
         }
@@ -127,6 +154,24 @@ namespace Infrastructure.Controllers
             }
 
             return NoContent();
+        }
+
+        //GET api/user/search/{text}
+        [HttpGet("search/{text}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<UserResponse>>> SearchUsersByTextAsync(string text)
+        {
+            var authorizedUserId = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (authorizedUserId == null)
+            {
+                ModelState.AddModelError(string.Empty, "Unauthorized.");
+                return ValidationProblem(statusCode: StatusCodes.Status401Unauthorized);
+            }
+
+            var users = await _usersRepository.SearchUsersByTextAsync(text);
+
+            return Ok(_mapper.Map<IEnumerable<UserResponse>>(users));
         }
 
         private async Task<string> SaveImageAsync(IFormFile imageFile)

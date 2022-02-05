@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Infrastructure.Entities
@@ -13,5 +14,6 @@ namespace Infrastructure.Entities
         [ForeignKey("User2Id")]
         public User User2 { get; set; }
         public List<ChatMessage> Messages { get; set; }
+        public DateTimeOffset LastMessageTime { get; set; }
     }
 }

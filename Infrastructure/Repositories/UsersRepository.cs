@@ -134,5 +134,24 @@ namespace Infrastructure.Repositories
             var updateResult = await _userManager.UpdateAsync(user);
             return _mapper.Map<SimpleResultDto>(updateResult);
         }
+
+        public async Task<IEnumerable<UserDto>> SearchUsersByTextAsync(string text)
+        {
+            var lowerCaseText = text.ToLower();
+            var users = await _context.Users.Where(u => u.UserName.ToLower().Contains(lowerCaseText)).ToListAsync();
+
+            return _mapper.Map<IEnumerable<UserDto>>(users);
+        }
+
+        public async Task<IEnumerable<UserDto>> GetAllUsersSortedByLastMessageTimeAsync(int userId)
+        {
+            var users = await _context.Chats
+                .Where(chat => chat.User1Id == userId || chat.User2Id == userId)
+                .OrderBy(chat => chat.LastMessageTime)
+                .Select(chat => chat.User1Id == userId ? chat.User2 : chat.User1)
+                .ToListAsync();
+
+            return _mapper.Map<IEnumerable<UserDto>>(users);
+        }
     }
 }

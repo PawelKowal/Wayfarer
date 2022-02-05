@@ -17,5 +17,7 @@ namespace ApplicationCore.Interfaces
         Task<bool> CheckUserPasswordAsync(UserDto userDto, string password);
         Task<GenerateRefreshTokenResultDto> GenerateRefreshTokenAsync(UserDto userDto, int refreshTokenExpirationInHours);
         Task<SimpleResultDto> UpdateUserAsync(UserDto userDto);
+        Task<IEnumerable<UserDto>> SearchUsersByTextAsync(string text);
+        Task<IEnumerable<UserDto>> GetAllUsersSortedByLastMessageTimeAsync(int userId);
     }
 }

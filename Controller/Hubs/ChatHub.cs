@@ -37,10 +37,15 @@ namespace Controller.Hubs
                 await _chatsRepository.SaveMessageAsync(messageDto);
 
                 var receiverConnectionId = _chatsRepository.GetConnectionId(message.ReceiverId);
+                var senderConnectionId = _chatsRepository.GetConnectionId(authorId);
 
                 if (receiverConnectionId is not null)
                 {
                     await Clients.Client(receiverConnectionId).ReceiveMessage(_mapper.Map<ChatMessageResponse>(messageDto));
+                }
+                if (senderConnectionId is not null)
+                {
+                    await Clients.Client(senderConnectionId).ReceiveMessage(_mapper.Map<ChatMessageResponse>(messageDto));
                 }
             }
         }
